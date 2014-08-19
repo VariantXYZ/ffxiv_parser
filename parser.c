@@ -14,6 +14,7 @@
 
 #define CHUNK 262144
 static int inf(FILE *source, FILE *dest);
+int UncompressData( const unsigned char* abSrc, int nLenSrc, unsigned char* abDst, int nLenDst );
 
 #pragma pack(1)
 struct Pkt_FFXIV
@@ -90,8 +91,12 @@ int main(int argc, char **argv)
 		printf("size: %u\n", packet.data->size);
 		printf("msgc: %u\n", packet.data->message_count);
 		printf("flag: %u %u\n", packet.data->flag1, packet.data->flag2);
-		printf("data: %s\n", packet.data->data);
-		printf("------------------\n");
+		if(packet.data->size)
+			printf("data: 0x%08X\n", *((unsigned int*)packet.data->data));
+		if(packet.data->flag2)
+			for(int i = 4; i < 100; i++)
+				printf("%02X ", packet.data->data[i]);
+		printf("\n------------------\n");
 
 		free(packet.data->data);
 		free(packet.data);		
