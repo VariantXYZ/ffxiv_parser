@@ -13,7 +13,6 @@
 #endif
 
 #define CHUNK 262144
-static int inf(FILE *source, FILE *dest);
 int UncompressData( const unsigned char* abSrc, int nLenSrc, unsigned char* abDst, int nLenDst );
 
 #pragma pack(1)
@@ -37,6 +36,21 @@ struct Pkt
         uint32_t len;
         uint32_t flags;
 	struct Pkt_FFXIV *data;	
+};
+struct Pkt_FFXIV_Chat
+{
+        uint32_t packet_id; //0..3
+        uint64_t unk1; //something player/chat related 4..11
+        uint32_t unk2; //something player/chat related 12..15
+        uint64_t unk3; //Something specific to chat type 16..23
+        uint64_t unk4; //Something specific to chat type 24..31
+        uint32_t unk5; //Something session specific 32..35
+        uint32_t unk6; //36..39
+        uint64_t id1; //Something character specific 40..47
+        uint32_t id2; //Something character specific 48..51
+        uint8_t zero; //Just a random 0... 52
+        char name[32]; //53+ is 32 byte name and message
+        char message[1024];
 };
 #pragma pack()
 
@@ -91,11 +105,14 @@ int main(int argc, char **argv)
 		printf("size: %u\n", packet.data->size);
 		printf("msgc: %u\n", packet.data->message_count);
 		printf("flag: %u %u\n", packet.data->flag1, packet.data->flag2);
-		if(packet.data->size)
-			printf("data: 0x%08X\n", *((unsigned int*)packet.data->data));
-		if(packet.data->flag2)
-			for(int i = 4; i < 100; i++)
-				printf("%02X ", packet.data->data[i]);
+		printf(" pkt: 0x%08X\n", *((unsigned int*)packet.data->data));
+
+	        if(*((unsigned int*)packet.data->data) == 0x00000458 || *((unsigned int*)packet.data->data) == 0x00000018)
+	        {
+	                struct Pkt_FFXIV_Chat chat = *((struct Pkt_FFXIV_Chat*)packet.data->data);
+	                printf("[%s]|[ID1: %llu, ID2:%u]: %s", chat.name, chat.id1, chat.id2, chat.message);
+	        }
+		
 		printf("\n------------------\n");
 
 		free(packet.data->data);
