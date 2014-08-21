@@ -121,7 +121,7 @@ int main(int argc, char **argv)
 			if(msg->msg_type == 0x00650014 || msg->msg_type == 0x00670014)
 			{
 				struct Pkt_FFXIV_chat chat = *(struct Pkt_FFXIV_chat*)(msg->data);
-				printf("[%s][%d %d]: %s", chat.name, chat.id1, chat.id2, chat.message);
+				printf("[%s][%X %X]: %s", chat.name, chat.id1, chat.id2, chat.message);
 			}
 			free(msg);
 		}
